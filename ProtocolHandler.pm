@@ -2,7 +2,6 @@ package Plugins::TIDAL::ProtocolHandler;
 
 use strict;
 
-use Async::Util;
 use JSON::XS::VersionOneAndTwo;
 use URI::Escape qw(uri_escape_utf8);
 use Scalar::Util qw(blessed);
@@ -68,7 +67,7 @@ sub trackGain {
 	# TODO - try to get album gain information?
 
 	my $gain = Slim::Player::ReplayGain::preventClipping($meta->{replay_gain}, $meta->{peak});
-	main::DEBUGLOG && $log->is_debug && $log->debug("Net replay gain: $gain");
+	main::INFOLOG && $log->is_info && $log->info("Net replay gain: $gain");
 
 	return $gain;
 }
@@ -166,86 +165,55 @@ sub getNextTrack {
 		return;
 	}
 
-	Async::Util::achain(
-		steps => [
-			sub {
-				my ($result, $acb) = @_;
 
-				Plugins::TIDAL::Plugin::getAPIHandler($client)->getTrackUrl(sub {
-					$acb->($_[0])
-				}, $trackId, {
-					audioquality => $prefs->get('quality'),
-					playbackmode => 'STREAM',
-					assetpresentation => 'FULL',
-				});
-			},
-			sub {
-				my ($result, $acb) = @_;
+	Plugins::TIDAL::Plugin::getAPIHandler($client)->getTrackUrl(sub {
+		my $response = shift;
 
-				if ($result && $result->{manifestMimeType} !~ m|application/vnd.tidal.bt| && $prefs->get('quality') eq 'HI_RES') {
-					$log->warn("failed to get streamable HiRes track ($url - $result->{manifestMimeType}), trying regular CD quality instead");
-					Plugins::TIDAL::Plugin::getAPIHandler($client)->getTrackUrl(sub {
-						$acb->($_[0])
-					}, $trackId, {
-						audioquality => 'LOSSLESS',
-						playbackmode => 'STREAM',
-						assetpresentation => 'FULL',
-					});
-
-					return;
-				}
-
-				$acb->($result);
-			},
-		],
-		cb => sub {
-			my ($response, $error) = @_;
-
-			$error = "failed to get track info" if !$response && !$error;
-
-			return _gotTrackError($error, $errorCb) if $error;
-
-			# no DASH or other for now
-			if ($response->{manifestMimeType} !~ m|application/vnd.tidal.bt|) {
-				return _gotTrackError("only plays streams $response->{manifestMimeType}", $errorCb);
-			}
-
-			my $manifest = eval { from_json(decode_base64($response->{manifest})) };
-			return _gotTrackError($@, $errorCb) if $@;
-
-			my $streamUrl = $manifest->{urls}[0];
-			my ($format) = $manifest->{mimeType} =~ m|audio/(\w+)|;
-			$format =~ s/flac/flc/;
-
-			# TODO - store album gain information
-
-			# this should not happen
-			if ($format ne Plugins::TIDAL::API::getFormat) {
-				$log->warn("did not get the expected format for $trackId ($format <> " . Plugins::TIDAL::API::getFormat() . ')');
-				$song->pluginData(format => $format);
-			}
-
-			# main::INFOLOG && $log->info("got $format track at $streamUrl");
-			$song->streamUrl($streamUrl);
-
-			# now try to acquire the header for seeking and various details
-			Slim::Utils::Scanner::Remote::parseRemoteHeader(
-				$song->track, $streamUrl, $format,
-				sub {
-					# update what we got from parsing actual stream and update metadata
-					$song->pluginData('bitrate', sprintf("%.0f" . Slim::Utils::Strings::string('KBPS'), $song->track->bitrate/1000));
-					$client->currentPlaylistUpdateTime( Time::HiRes::time() );
-					Slim::Control::Request::notifyFromArray( $client, [ 'newmetadata' ] );
-					$successCb->();
-				},
-				sub {
-					my ($self, $error) = @_;
-					$log->warn( "could not find $format header $error" );
-					$successCb->();
-				}
-			);
+		# no DASH or other for now
+		if ($response->{manifestMimeType} !~ m|application/vnd.tidal.bt|) {
+			return _gotTrackError("only plays streams $response->{manifestMimeType}", $errorCb);
 		}
-	);
+
+		my $manifest = eval { from_json(decode_base64($response->{manifest})) };
+		return _gotTrackError($@, $errorCb) if $@;
+
+		my $streamUrl = $manifest->{urls}[0];
+		my ($format) = $manifest->{mimeType} =~ m|audio/(\w+)|;
+		$format =~ s/flac/flc/;
+
+		# TODO - store album gain information
+
+		# this should not happen
+		if ($format ne Plugins::TIDAL::API::getFormat) {
+			$log->warn("did not get the expected format for $trackId ($format <> " . Plugins::TIDAL::API::getFormat() . ')');
+			$song->pluginData(format => $format);
+		}
+
+		# main::INFOLOG && $log->info("got $format track at $streamUrl");
+		$song->streamUrl($streamUrl);
+
+		# now try to acquire the header for seeking and various details
+		Slim::Utils::Scanner::Remote::parseRemoteHeader(
+			$song->track, $streamUrl, $format,
+			sub {
+				# update what we got from parsing actual stream and update metadata
+				$song->pluginData('bitrate', sprintf("%.0f" . Slim::Utils::Strings::string('KBPS'), $song->track->bitrate/1000));
+				$client->currentPlaylistUpdateTime( Time::HiRes::time() );
+				Slim::Control::Request::notifyFromArray( $client, [ 'newmetadata' ] );
+				$successCb->();
+			},
+			sub {
+				my ($self, $error) = @_;
+				$log->warn( "could not find $format header $error" );
+				$successCb->();
+			}
+		);
+	}, $trackId,
+	{
+		audioquality => $prefs->get('quality'),
+		playbackmode => 'STREAM',
+		assetpresentation => 'FULL',
+	});
 
 	main::DEBUGLOG && $log->is_debug && $log->debug("Getting next track playback info for $url");
 }
