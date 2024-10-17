@@ -169,10 +169,10 @@ sub getNextTrack {
 	Plugins::TIDAL_test::Plugin::getAPIHandler($client)->getTrackUrl(sub {
 		my $response = shift;
 
-		# no DASH or other for now
-		if ($response->{manifestMimeType} !~ m|application/vnd.tidal.bt|) {
-			return _gotTrackError("only plays streams $response->{manifestMimeType}", $errorCb);
-		}
+		# # no DASH or other for now
+		# if ($response->{manifestMimeType} !~ m|application/vnd.tidal.bt|) {
+		# 	return _gotTrackError("only plays streams $response->{manifestMimeType}", $errorCb);
+		# }
 
 		my $manifest = eval { from_json(decode_base64($response->{manifest})) };
 		return _gotTrackError($@, $errorCb) if $@;
