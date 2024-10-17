@@ -2,7 +2,7 @@
 <extensions>
   <plugins>
     <plugin maxTarget="*" version="1.5.1" name="TIDAL" minTarget="8.3">
-      <title lang="EN">TIDAL</title>
+      <title lang="EN">TIDAL test</title>
       <icon>https://raw.githubusercontent.com/dannie326/lms-plugin-tidal/main/HTML/EN/plugins/TIDAL/html/tidal_MTL_svg_tidal.png</icon>
       <url>https://github.com/dannie326/lms-plugin-tidal/releases/download/1.5.1/TIDAL.zip</url>
       <desc lang="EN">TIDAL for local LMS use, Test</desc>
