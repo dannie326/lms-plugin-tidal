@@ -1,15 +1,15 @@
 <?xml version='1.0' standalone='yes'?>
 <extensions>
   <plugins>
-    <plugin maxTarget="*" minTarget="8.3" version="1.5.1" name="TIDAL(Test)">
-      <creator>Michael Herger, philippe_44</creator>
-      <url>https://github.com/dannie326/lms-plugin-tidal/releases/download/1.5.1/Tidal_Test.zip</url>
-      <title lang="EN">TIDAL Test</title>
-      <icon>https://raw.githubusercontent.com/dannie326/lms-plugin-tidal/main/HTML/EN/plugins/TIDAL/html/tidal_MTL_svg_tidal.png</icon>
-      <category>musicservices</category>
-      <sha>da3cfdbdaf85327e2fd415a84be303e97ca375e9</sha>
+    <plugin version="1.5.1" maxTarget="*" name="TIDAL(Test)" minTarget="8.3">
       <link>https://github.com/dannie326/lms-plugin-tidal</link>
+      <category>musicservices</category>
       <desc lang="EN">TIDAL for local LMS use</desc>
+      <creator>Michael Herger, philippe_44</creator>
+      <icon>https://raw.githubusercontent.com/dannie326/lms-plugin-tidal/main/HTML/EN/plugins/TIDAL/html/tidal_MTL_svg_tidal.png</icon>
+      <url>https://github.com/dannie326/lms-plugin-tidal/releases/download/1.5.1/Tidal_Test.zip</url>
+      <sha>a4eb94417393655cb5a947ca8af9246e5b14a113</sha>
+      <title lang="EN">TIDAL Test</title>
     </plugin>
   </plugins>
 </extensions>
