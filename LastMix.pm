@@ -1,4 +1,4 @@
-package Plugins::TIDAL::LastMix;
+package Plugins::TIDAL_test::LastMix;
 
 use strict;
 
@@ -13,10 +13,10 @@ sub isEnabled {
 
 	return unless $client;
 
-	return unless Slim::Utils::PluginManager->isEnabled('Plugins::TIDAL::Plugin');
+	return unless Slim::Utils::PluginManager->isEnabled('Plugins::TIDAL_test::Plugin');
 
-	require Plugins::TIDAL::API;
-	return Plugins::TIDAL::API::->getSomeUserId() ? 'TIDAL' : undef;
+	require Plugins::TIDAL_test::API;
+	return Plugins::TIDAL_test::API::->getSomeUserId() ? 'TIDAL' : undef;
 }
 
 sub lookup {
@@ -26,7 +26,7 @@ sub lookup {
 	$class->cb($cb) if $cb;
 	$class->args($args) if $args;
 
-	Plugins::TIDAL::Plugin::getAPIHandler($client)->search(sub {
+	Plugins::TIDAL_test::Plugin::getAPIHandler($client)->search(sub {
 		my $tracks = shift;
 
 		if (!$tracks) {
@@ -35,7 +35,7 @@ sub lookup {
 
 		my $candidates = [];
 		my $searchArtist = $class->args->{artist};
-		my $ct = Plugins::TIDAL::API::getFormat();
+		my $ct = Plugins::TIDAL_test::API::getFormat();
 
 		for my $track ( @$tracks ) {
 			next unless $track->{artist} && $track->{id} && $track->{title} && $track->{artist}->{name};

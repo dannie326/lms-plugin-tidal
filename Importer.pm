@@ -1,4 +1,4 @@
-package Plugins::TIDAL::Importer;
+package Plugins::TIDAL_test::Importer;
 
 use strict;
 
@@ -21,8 +21,8 @@ my ($ct, $splitChar);
 sub startScan { if (main::SCANNER) {
 	my ($class) = @_;
 
-	require Plugins::TIDAL::API::Sync;
-	$ct = Plugins::TIDAL::API::getFormat();
+	require Plugins::TIDAL_test::API::Sync;
+	$ct = Plugins::TIDAL_test::API::getFormat();
 	$splitChar = substr(preferences('server')->get('splitList'), 0, 1);
 
 	my $accounts = _enabledAccounts();
@@ -64,7 +64,7 @@ sub scanAlbums { if (main::SCANNER) {
 		main::INFOLOG && $log->is_info && $log->info("Reading albums... " . $accountName);
 		$progress->update(string('PLUGIN_TIDAL_PROGRESS_READ_ALBUMS', $accountName));
 
-		my $albums = Plugins::TIDAL::API::Sync->getFavorites($userId, 'albums') || [];
+		my $albums = Plugins::TIDAL_test::API::Sync->getFavorites($userId, 'albums') || [];
 		$progress->total(scalar @$albums);
 
 		foreach my $album (@$albums) {
@@ -87,7 +87,7 @@ sub scanAlbums { if (main::SCANNER) {
 		while ( my ($albumId, $album) = each %missingAlbums ) {
 			$progress->update($album->{title});
 
-			$album->{tracks} = Plugins::TIDAL::API::Sync->albumTracks($userId, $albumId);
+			$album->{tracks} = Plugins::TIDAL_test::API::Sync->albumTracks($userId, $albumId);
 
 			if (!$album->{tracks}) {
 				$log->warn("Didn't receive tracks for $album->{title}/$album->{id}");
@@ -122,7 +122,7 @@ sub scanArtists { if (main::SCANNER) {
 		main::INFOLOG && $log->is_info && $log->info("Reading artists... " . $accountName);
 		$progress->update(string('PLUGIN_TIDAL_PROGRESS_READ_ARTISTS', $accountName));
 
-		my $artists = Plugins::TIDAL::API::Sync->getFavorites($userId, 'artists') || [];
+		my $artists = Plugins::TIDAL_test::API::Sync->getFavorites($userId, 'artists') || [];
 
 		$progress->total($progress->total + scalar @$artists);
 
@@ -167,7 +167,7 @@ sub scanPlaylists { if (main::SCANNER) {
 		$progress->update(string('PLUGIN_TIDAL_PROGRESS_READ_PLAYLISTS', $accountName), $progress->done);
 
 		main::INFOLOG && $log->is_info && $log->info("Reading playlists for $accountName...");
-		my $playlists = Plugins::TIDAL::API::Sync->collectionPlaylists($userId) || [];
+		my $playlists = Plugins::TIDAL_test::API::Sync->collectionPlaylists($userId) || [];
 
 		$progress->total($progress->total + @$playlists);
 
@@ -177,7 +177,7 @@ sub scanPlaylists { if (main::SCANNER) {
 		foreach my $playlist (@{$playlists || []}) {
 			my $uuid = $playlist->{uuid} or next;
 
-			my $tracks = Plugins::TIDAL::API::Sync->playlist($userId, $uuid);
+			my $tracks = Plugins::TIDAL_test::API::Sync->playlist($userId, $uuid);
 
 			$progress->update($accountName . string('COLON') . ' ' . $playlist->{title});
 			Slim::Schema->forceCommit;
@@ -219,8 +219,8 @@ sub getArtistPicture { if (main::SCANNER) {
 
 	$id =~ s/tidal:artist://;
 
-	require Plugins::TIDAL::API::Sync;
-	my $artist = Plugins::TIDAL::API::Sync->getArtist(undef, $id) || {};
+	require Plugins::TIDAL_test::API::Sync;
+	my $artist = Plugins::TIDAL_test::API::Sync->getArtist(undef, $id) || {};
 
 	if ($artist->{cover}) {
 		_cacheArtistPictureUrl($artist, '3M');
@@ -253,7 +253,7 @@ sub needsUpdate { if (!main::SCANNER) {
 	Async::Util::achain(
 		steps => [ map {
 			my $userId = $_;
-			my $api = Plugins::TIDAL::API::Async->new({ userId => $userId });
+			my $api = Plugins::TIDAL_test::API::Async->new({ userId => $userId });
 
 			my @tasks = (
 				sub {
@@ -320,7 +320,7 @@ my %roleMap = (
 sub _prepareTrack {
 	my ($album, $track) = @_;
 
-	$ct ||= Plugins::TIDAL::API::getFormat();
+	$ct ||= Plugins::TIDAL_test::API::getFormat();
 	my $url = 'tidal://' . $track->{id} . ".$ct";
 
 	my $trackData = {

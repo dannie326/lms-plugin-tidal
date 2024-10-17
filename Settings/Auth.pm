@@ -1,4 +1,4 @@
-package Plugins::TIDAL::Settings::Auth;
+package Plugins::TIDAL_test::Settings::Auth;
 
 use strict;
 use base qw(Slim::Web::Settings);
@@ -32,20 +32,20 @@ sub handler {
 	my ($class, $client, $params, $callback, $httpClient, $response) = @_;
 
 	if ($params->{cancelAuth}) {
-		Plugins::TIDAL::API::Auth->cancelDeviceAuth($params->{deviceCode});
+		Plugins::TIDAL_test::API::Auth->cancelDeviceAuth($params->{deviceCode});
 
 		$response->code(RC_MOVED_TEMPORARILY);
 		$response->header('Location' => 'settings.html');
 		return Slim::Web::HTTP::filltemplatefile($class->page, $params);
 	}
 
-	Plugins::TIDAL::API::Auth->initDeviceFlow(sub {
+	Plugins::TIDAL_test::API::Auth->initDeviceFlow(sub {
 		my $deviceAuthInfo = shift;
 
 		my $deviceCode = $deviceAuthInfo->{deviceCode};
 		$deviceCodes{$deviceCode}++;
 
-		Plugins::TIDAL::API::Auth->pollDeviceAuth($deviceAuthInfo, sub {
+		Plugins::TIDAL_test::API::Auth->pollDeviceAuth($deviceAuthInfo, sub {
 			my $accountInfo = shift || {};
 
 			if (!$accountInfo->{user} || !$accountInfo->{user_id}) {

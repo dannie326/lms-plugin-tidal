@@ -1,4 +1,4 @@
-package Plugins::TIDAL::InfoMenu;
+package Plugins::TIDAL_test::InfoMenu;
 
 use strict;
 use Tie::Cache::LRU;
@@ -7,8 +7,8 @@ use Slim::Utils::Log;
 use Slim::Utils::Prefs;
 use Slim::Utils::Strings qw(cstring);
 
-use Plugins::TIDAL::API::Async;
-use Plugins::TIDAL::Plugin;
+use Plugins::TIDAL_test::API::Async;
+use Plugins::TIDAL_test::Plugin;
 
 my $log = logger('plugin.tidal');
 my $prefs = preferences('plugin.tidal');
@@ -42,7 +42,7 @@ sub menuInfoWeb {
 	Slim::Control::XMLBrowser::cliQuery('tidal_info', sub {
 		my ($client, $cb, $args) = @_;
 
-		my $api = Plugins::TIDAL::Plugin::getAPIHandler($client);
+		my $api = Plugins::TIDAL_test::Plugin::getAPIHandler($client);
 
 		my $subInfo = sub {
 			my $favorites = shift || [];
@@ -129,7 +129,7 @@ sub menuInfoWeb {
 				my ($icon, $entry) = @_;
 
 				# we need to add favorites for cliQuery to add them
-				$entry = Plugins::TIDAL::Plugin::_renderItem($client, $entry, { addArtistToTitle => 1 });
+				$entry = Plugins::TIDAL_test::Plugin::_renderItem($client, $entry, { addArtistToTitle => 1 });
 				my $favorites = Slim::Control::XMLBrowser::_favoritesParams($entry) || {};
 				$favorites->{favorites_icon} = $favorites->{icon} if $favorites;
 				$cb->( {
@@ -156,7 +156,7 @@ sub menuInfoWeb {
 sub addToPlaylist {
 	my ($client, $cb, undef, $params) = @_;
 
-	my $api = Plugins::TIDAL::Plugin::getAPIHandler($client);
+	my $api = Plugins::TIDAL_test::Plugin::getAPIHandler($client);
 
 	$api->getCollectionPlaylists( sub {
 		my $items = [];
@@ -175,7 +175,7 @@ sub addToPlaylist {
 					name => $item->{title},
 					isContextMenu => 1,
 					refresh => 1,
-					image => Plugins::TIDAL::API->getImageUrl($item, 'usePlaceholder'),
+					image => Plugins::TIDAL_test::API->getImageUrl($item, 'usePlaceholder'),
 					jive => {
 						nextWindow => 'grandparent',
 						actions => {
@@ -197,7 +197,7 @@ sub addToPlaylist {
 							_completed($client, $cb);
 						}, 'add', $params->{uuid}, $params->{trackId} );
 					},
-					image => Plugins::TIDAL::API->getImageUrl($item, 'usePlaceholder'),
+					image => Plugins::TIDAL_test::API->getImageUrl($item, 'usePlaceholder'),
 					passthrough => [ { trackId => $params->{id}, uuid => $item->{uuid} } ],
 				};
 			}
@@ -248,7 +248,7 @@ sub menuAction {
 			}, $request );
 		}
 	} else {
-		my $api = Plugins::TIDAL::Plugin::getAPIHandler($request->client);
+		my $api = Plugins::TIDAL_test::Plugin::getAPIHandler($request->client);
 		my $action = $request->getParam('_action');
 
 		main::INFOLOG && $log->is_info && $log->info("JSON RPC action $action for $id");
@@ -310,7 +310,7 @@ sub menuBrowse {
 
 		if ( $type eq 'album' ) {
 
-			Plugins::TIDAL::Plugin::getAlbum($client, sub {
+			Plugins::TIDAL_test::Plugin::getAlbum($client, sub {
 				my $feed = $_[0];
 				$rootFeeds{$key} = \$feed;
 				$cb->($feed);
@@ -318,8 +318,8 @@ sub menuBrowse {
 
 		} elsif ( $type eq 'artist' ) {
 
-			Plugins::TIDAL::Plugin::getAPIHandler($client)->getArtist(sub {
-				my $feed = Plugins::TIDAL::Plugin::_renderItem( $client, $_[0] ) if $_[0];
+			Plugins::TIDAL_test::Plugin::getAPIHandler($client)->getArtist(sub {
+				my $feed = Plugins::TIDAL_test::Plugin::_renderItem( $client, $_[0] ) if $_[0];
 				$rootFeeds{$key} = \$feed;
 				# no need to add any action, the root 'tidal_browse' is memorized and cliQuery
 				# will provide us with item_id hierarchy. All we need is to know where our root
@@ -329,8 +329,8 @@ sub menuBrowse {
 
 		} elsif ( $type eq 'playlist' ) {
 
-			Plugins::TIDAL::Plugin::getAPIHandler($client)->playlist(sub {
-				my $items = [ map { Plugins::TIDAL::Plugin::_renderItem( $client, $_) } @{$_[0]} ] if $_[0];
+			Plugins::TIDAL_test::Plugin::getAPIHandler($client)->playlist(sub {
+				my $items = [ map { Plugins::TIDAL_test::Plugin::_renderItem( $client, $_) } @{$_[0]} ] if $_[0];
 				# don't memorize the feed as we won't redescend into it (maybe we'll use 'M' again)
 				$cb->( { items => $items } );
 			}, $id );
@@ -339,14 +339,14 @@ sub menuBrowse {
 
 			# track must be in cache, no memorizing
 			my $cache = Slim::Utils::Cache->new;
-			my $track = Plugins::TIDAL::Plugin::_renderItem( $client, $cache->get('tidal_meta_' . $id), { addArtistToTitle => 1 } );
+			my $track = Plugins::TIDAL_test::Plugin::_renderItem( $client, $cache->get('tidal_meta_' . $id), { addArtistToTitle => 1 } );
 			$cb->( { items => [ $track ] } );
 
 		} elsif ( $type eq 'track_mix' ) {
 
-			Plugins::TIDAL::Plugin::getAPIHandler($client)->trackRadio(sub {
+			Plugins::TIDAL_test::Plugin::getAPIHandler($client)->trackRadio(sub {
 				my $feed = { };
-				$feed->{items} = [ map { Plugins::TIDAL::Plugin::_renderItem( $client, $_) } @{$_[0]} ] if $_[0];
+				$feed->{items} = [ map { Plugins::TIDAL_test::Plugin::_renderItem( $client, $_) } @{$_[0]} ] if $_[0];
 				# memorize feed as we will drill-down again
 				$rootFeeds{$key} = \$feed;
 				$cb->($feed);
@@ -355,9 +355,9 @@ sub menuBrowse {
 		} elsif ( $type eq 'podcast' ) {
 
 			# we need to re-acquire the podcast itself
-			Plugins::TIDAL::Plugin::getAPIHandler($client)->podcast(sub {
+			Plugins::TIDAL_test::Plugin::getAPIHandler($client)->podcast(sub {
 				my $podcast = shift;
-				Plugins::TIDAL::Plugin::getPodcastEpisodes($client, $cb, $args, {
+				Plugins::TIDAL_test::Plugin::getPodcastEpisodes($client, $cb, $args, {
 					id => $id,
 					podcast => $podcast,
 				} );
@@ -367,7 +367,7 @@ sub menuBrowse {
 
 			# episode must be in cache, no memorizing
 			my $cache = Slim::Utils::Cache->new;
-			my $episode = Plugins::TIDAL::Plugin::_renderItem( $client, $cache->get('tidal_episode_meta_' . $id) );
+			my $episode = Plugins::TIDAL_test::Plugin::_renderItem( $client, $cache->get('tidal_episode_meta_' . $id) );
 			$cb->( { items => [$episode] });
 =cut
 		}
@@ -502,7 +502,7 @@ sub _menuTrackInfo {
 	}, {
 		name => cstring($api->client, 'PLUGIN_TIDAL_TRACK_MIX'),
 		type => 'playlist',
-		url => \&Plugins::TIDAL::Plugin::getTrackRadio,
+		url => \&Plugins::TIDAL_test::Plugin::getTrackRadio,
 		passthrough => [{ id => $id }],
 		itemActions => {
 			items => {
@@ -577,7 +577,7 @@ sub _menuAlbumInfo {
 			parseURLs => 1
 		} );
 
-		my $icon = Plugins::TIDAL::API->getImageUrl($album, 'usePlaceholder');
+		my $icon = Plugins::TIDAL_test::API->getImageUrl($album, 'usePlaceholder');
 		$cb->($icon, $album);
 
 	}, $id );
@@ -609,7 +609,7 @@ sub _menuArtistInfo {
 			parseURLs => 1
 		} );
 
-		my $icon = Plugins::TIDAL::API->getImageUrl($artist, 'usePlaceholder');
+		my $icon = Plugins::TIDAL_test::API->getImageUrl($artist, 'usePlaceholder');
 		$cb->($icon, $artist);
 
 	}, $id );
@@ -650,7 +650,7 @@ sub _menuPlaylistInfo {
 			parseURLs => 1
 		} );
 
-		my $icon = Plugins::TIDAL::API->getImageUrl($playlist, 'usePlaceholder');
+		my $icon = Plugins::TIDAL_test::API->getImageUrl($playlist, 'usePlaceholder');
 		$cb->($icon, $playlist);
 
 	}, $id );
@@ -686,7 +686,7 @@ sub _menuPodcastInfo {
 			parseURLs => 1
 		} );
 
-		my $icon = Plugins::TIDAL::API->getImageUrl($podcast, 'usePlaceholder');
+		my $icon = Plugins::TIDAL_test::API->getImageUrl($podcast, 'usePlaceholder');
 		$cb->($icon, $podcast);
 
 	}, $id );
@@ -735,7 +735,7 @@ sub _menuEpisodeInfo {
 			parseURLs => 1
 		} );
 
-		my $icon = Plugins::TIDAL::API->getImageUrl($episode, 'usePlaceholder');
+		my $icon = Plugins::TIDAL_test::API->getImageUrl($episode, 'usePlaceholder');
 		$cb->($icon, $episode);
 
 	}, $id );

@@ -1,4 +1,4 @@
-package Plugins::TIDAL::API::Auth;
+package Plugins::TIDAL_test::API::Auth;
 
 use strict;
 use Data::URIEncode qw(complex_to_query);
@@ -11,7 +11,7 @@ use Slim::Utils::Log;
 use Slim::Utils::Prefs;
 use Slim::Utils::Strings qw(string);
 
-use Plugins::TIDAL::API qw(AURL KURL SCOPES GRANT_TYPE_DEVICE);
+use Plugins::TIDAL_test::API qw(AURL KURL SCOPES GRANT_TYPE_DEVICE);
 
 use constant TOKEN_PATH => '/v1/oauth2/token';
 

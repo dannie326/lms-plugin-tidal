@@ -1,4 +1,4 @@
-package Plugins::TIDAL::Plugin;
+package Plugins::TIDAL_test::Plugin;
 
 use strict;
 use Async::Util;
@@ -9,9 +9,9 @@ use Slim::Utils::Log;
 use Slim::Utils::Prefs;
 use Slim::Utils::Strings qw(cstring);
 
-use Plugins::TIDAL::API::Async;
-use Plugins::TIDAL::API::Auth;
-use Plugins::TIDAL::ProtocolHandler;
+use Plugins::TIDAL_test::API::Async;
+use Plugins::TIDAL_test::API::Auth;
+use Plugins::TIDAL_test::ProtocolHandler;
 
 use constant MODULE_MATCH_REGEX => qr/MIX_LIST|MIXED_TYPES_LIST|PLAYLIST_LIST|ALBUM_LIST|TRACK_LIST/;
 
@@ -44,21 +44,21 @@ sub initPlugin {
 		return !defined $new || $new eq '' || $new =~ /^[A-Z]{2}$/i;
 	} }, 'countryCode');
 
-	Plugins::TIDAL::API::Auth->init();
+	Plugins::TIDAL_test::API::Auth->init();
 
 	if (main::WEBUI) {
-		require Plugins::TIDAL::Settings;
-		require Plugins::TIDAL::Settings::Auth;
-		require Plugins::TIDAL::InfoMenu;
-		Plugins::TIDAL::Settings->new();
-		Plugins::TIDAL::Settings::Auth->new();
-		Plugins::TIDAL::InfoMenu->init();
+		require Plugins::TIDAL_test::Settings;
+		require Plugins::TIDAL_test::Settings::Auth;
+		require Plugins::TIDAL_test::InfoMenu;
+		Plugins::TIDAL_test::Settings->new();
+		Plugins::TIDAL_test::Settings::Auth->new();
+		Plugins::TIDAL_test::InfoMenu->init();
 	}
 
-	Slim::Player::ProtocolHandlers->registerHandler('tidal', 'Plugins::TIDAL::ProtocolHandler');
+	Slim::Player::ProtocolHandlers->registerHandler('tidal', 'Plugins::TIDAL_test::ProtocolHandler');
 	# Hijack the old wimp:// URLs
-	Slim::Player::ProtocolHandlers->registerHandler('wimp', 'Plugins::TIDAL::ProtocolHandler');
-	Slim::Music::Import->addImporter('Plugins::TIDAL::Importer', { use => 1 });
+	Slim::Player::ProtocolHandlers->registerHandler('wimp', 'Plugins::TIDAL_test::ProtocolHandler');
+	Slim::Music::Import->addImporter('Plugins::TIDAL_test::Importer', { use => 1 });
 
 	# Track Info item
 	Slim::Menu::TrackInfo->registerInfoProvider( tidalTrackInfo => (
@@ -111,28 +111,28 @@ sub postinitPlugin {
 
 		if (!$@) {
 			main::INFOLOG && $log->info("LastMix plugin is available - let's use it!");
-			require Plugins::TIDAL::LastMix;
-			Plugins::LastMix::Services->registerHandler('Plugins::TIDAL::LastMix', 'lossless');
+			require Plugins::TIDAL_test::LastMix;
+			Plugins::LastMix::Services->registerHandler('Plugins::TIDAL_test::LastMix', 'lossless');
 		}
 	}
 }
 
 sub onlineLibraryNeedsUpdate {
 	my $class = shift;
-	require Plugins::TIDAL::Importer;
-	return Plugins::TIDAL::Importer->needsUpdate(@_);
+	require Plugins::TIDAL_test::Importer;
+	return Plugins::TIDAL_test::Importer->needsUpdate(@_);
 }
 
 sub getLibraryStats {
-	require Plugins::TIDAL::Importer;
-	my $totals = Plugins::TIDAL::Importer->getLibraryStats();
+	require Plugins::TIDAL_test::Importer;
+	my $totals = Plugins::TIDAL_test::Importer->getLibraryStats();
 	return wantarray ? ('PLUGIN_TIDAL_NAME', $totals) : $totals;
 }
 
 sub handleFeed {
 	my ($client, $cb, $args) = @_;
 
-	if ( !Plugins::TIDAL::API->getSomeUserId() ) {
+	if ( !Plugins::TIDAL_test::API->getSomeUserId() ) {
 		return $cb->({
 			items => [{
 				name => cstring($client, 'PLUGIN_TIDAL_REQUIRES_CREDENTIALS'),
@@ -262,7 +262,7 @@ sub selectAccount {
 
 	my $userId = getAPIHandler($client)->userId;
 	my $items = [ map {
-		my $name = Plugins::TIDAL::API->getHumanReadableName($_);
+		my $name = Plugins::TIDAL_test::API->getHumanReadableName($_);
 		$name = '* ' . $name if $_->{userId} == $userId;
 
 		{
@@ -316,7 +316,7 @@ sub trackInfoMenu {
 
 	my $artists = ($track->remote && $isTidalTrack) ? $remoteMeta->{artists} : [];
 	my $albumId = ($track->remote && $isTidalTrack) ? $remoteMeta->{album_id} : undef;
-	my $trackId = Plugins::TIDAL::ProtocolHandler::getId($track->url);
+	my $trackId = Plugins::TIDAL_test::ProtocolHandler::getId($track->url);
 
 	push @$items, {
 		name => $album,
@@ -325,7 +325,7 @@ sub trackInfoMenu {
 		favorites_url => 'tidal://album:' . $albumId,
 		type => 'playlist',
 		url => \&getAlbum,
-		image => Plugins::TIDAL::API->getImageUrl($remoteMeta, 'usePlaceholder'),
+		image => Plugins::TIDAL_test::API->getImageUrl($remoteMeta, 'usePlaceholder'),
 		passthrough => [{ id => $albumId }],
 	} if $albumId;
 
@@ -411,10 +411,10 @@ sub _completed {
 sub addPlayingToFavorites {
 	my ($client, $cb, $args, $params) = @_;
 
-	my $id = Plugins::TIDAL::ProtocolHandler::getId($params->{url});
+	my $id = Plugins::TIDAL_test::ProtocolHandler::getId($params->{url});
 	return _completed($client, $cb) unless $id;
 
-	Plugins::TIDAL::Plugin::getAPIHandler($client)->updateFavorite( sub {
+	Plugins::TIDAL_test::Plugin::getAPIHandler($client)->updateFavorite( sub {
 		_completed($client, $cb);
 	}, 'add', 'track', $id );
 }
@@ -422,10 +422,10 @@ sub addPlayingToFavorites {
 sub addPlayingToPlaylist {
 	my ($client, $cb, $args, $params) = @_;
 
-	my $id = Plugins::TIDAL::ProtocolHandler::getId($params->{url});
+	my $id = Plugins::TIDAL_test::ProtocolHandler::getId($params->{url});
 	return _completed($client, $cb) unless $id;
 
-	Plugins::TIDAL::InfoMenu::addToPlaylist($client, $cb, undef, { id => $id }),
+	Plugins::TIDAL_test::InfoMenu::addToPlaylist($client, $cb, undef, { id => $id }),
 }
 
 sub artistInfoMenu {
@@ -692,7 +692,7 @@ sub getHighlights {
 		my $title = $entry->{title};
 		my $item = $entry->{item}->{item};
 
-		($item) = @{Plugins::TIDAL::API->cacheTrackMetadata([ $item ])} if $entry->{item}->{type} eq 'TRACK';
+		($item) = @{Plugins::TIDAL_test::API->cacheTrackMetadata([ $item ])} if $entry->{item}->{type} eq 'TRACK';
 		$item = _renderItem($client, $item, { addArtistToTitle => 1 });
 		$item->{name} = "$title: $item->{name}" unless $entry->{item}->{type} eq 'MIX';
 
@@ -712,7 +712,7 @@ sub getModule {
 	return $cb->() if $module->{type} !~ MODULE_MATCH_REGEX;
 
 	my $items = $module->{pagedList}->{items};
-	$items = Plugins::TIDAL::API->cacheTrackMetadata($items) if $module->{type} eq 'TRACK_LIST';
+	$items = Plugins::TIDAL_test::API->cacheTrackMetadata($items) if $module->{type} eq 'TRACK_LIST';
 
 	$items = [ map {
 		my $item = $_;
@@ -751,7 +751,7 @@ sub getDataPage {
 	getAPIHandler($client)->dataPage(sub {
 		my $items = shift;
 
-		$items = Plugins::TIDAL::API->cacheTrackMetadata($items) if $params->{type} eq 'TRACK_LIST';
+		$items = Plugins::TIDAL_test::API->cacheTrackMetadata($items) if $params->{type} eq 'TRACK_LIST';
 		$items = [ map { _renderItem($client, $_, { addArtistToTitle => 1 }) } @$items ];
 
 		$cb->({
@@ -783,7 +783,7 @@ sub getMoods {
 				name => $_->{name},
 				type => 'link',
 				url => \&getMoodPlaylists,
-				image => Plugins::TIDAL::API->getImageUrl($_, 'usePlaceholder', 'mood'),
+				image => Plugins::TIDAL_test::API->getImageUrl($_, 'usePlaceholder', 'mood'),
 				passthrough => [ { mood => $_->{path} } ],
 			};
 		} @{$_[0]} ];
@@ -858,7 +858,7 @@ sub searchEverything {
 
 			my $entries = $key ne 'tracks' ?
 						  $result->{$key}->{items} :
-						  Plugins::TIDAL::API->cacheTrackMetadata($result->{$key}->{items});
+						  Plugins::TIDAL_test::API->cacheTrackMetadata($result->{$key}->{items});
 
 			push @$items, {
 				name => cstring($client, $key =~ s/tracks/songs/r),
@@ -878,7 +878,7 @@ sub searchEverything {
 sub _renderItem {
 	my ($client, $item, $args) = @_;
 
-	my $type = Plugins::TIDAL::API->typeOfItem($item);
+	my $type = Plugins::TIDAL_test::API->typeOfItem($item);
 
 	if ($type eq 'track') {
 		return _renderTrack($item, $args->{addArtistToTitle}, $args->{playlistId});
@@ -920,7 +920,7 @@ sub _renderPlaylist {
 		# play => 'tidal://playlist:' . $item->{uuid},
 		type => 'playlist',
 		url => \&getPlaylist,
-		image => Plugins::TIDAL::API->getImageUrl($item),
+		image => Plugins::TIDAL_test::API->getImageUrl($item),
 		passthrough => [ { uuid => $item->{uuid}, creatorId => $item->{creator}->{id} } ],
 		itemActions => {
 			info => {
@@ -964,7 +964,7 @@ sub _renderAlbum {
 		favorites_type => 'playlist',
 		type => 'playlist',
 		url => \&getAlbum,
-		image => Plugins::TIDAL::API->getImageUrl($item, 'usePlaceholder'),
+		image => Plugins::TIDAL_test::API->getImageUrl($item, 'usePlaceholder'),
 		passthrough => [{ id => $item->{id} }],
 		# we need a 'play' for M(ore) to appear or set play, add and insert actions
 		# play => 'tidal://album:' . $item->{id},
@@ -1002,7 +1002,7 @@ sub _renderTrack {
 
 	my $title = $item->{title};
 	$title .= ' - ' . $item->{artist}->{name} if $addArtistToTitle;
-	my $url = "tidal://$item->{id}." . Plugins::TIDAL::API::getFormat();
+	my $url = "tidal://$item->{id}." . Plugins::TIDAL_test::API::getFormat();
 
 	my $fixedParams = {
 		playlistId => $playlistId,
@@ -1099,13 +1099,13 @@ sub _renderArtist {
 		type => 'outline',
 		items => $items,
 		itemActions => $itemActions,
-		image => Plugins::TIDAL::API->getImageUrl($item, 'usePlaceholder'),
+		image => Plugins::TIDAL_test::API->getImageUrl($item, 'usePlaceholder'),
 	}
 	: {
 		%{$items->[0]},
 		name => $item->{name},
 		itemActions => $itemActions,
-		image => Plugins::TIDAL::API->getImageUrl($item, 'usePlaceholder'),
+		image => Plugins::TIDAL_test::API->getImageUrl($item, 'usePlaceholder'),
 	};
 }
 
@@ -1119,7 +1119,7 @@ sub _renderMix {
 		favorites_url => 'tidal://mix:' . $item->{id},
 		type => 'playlist',
 		url => \&getMix,
-		image => Plugins::TIDAL::API->getImageUrl($item, 'usePlaceholder'),
+		image => Plugins::TIDAL_test::API->getImageUrl($item, 'usePlaceholder'),
 		passthrough => [{ id => $item->{id} }],
 	};
 }
@@ -1162,7 +1162,7 @@ sub _renderCategory {
 		name => $item->{name},
 		type => 'outline',
 		items => $items,
-		image => Plugins::TIDAL::API->getImageUrl($item, 'usePlaceholder', 'genre'),
+		image => Plugins::TIDAL_test::API->getImageUrl($item, 'usePlaceholder', 'genre'),
 		passthrough => [ { path => $item->{path} } ],
 	};
 }
@@ -1187,22 +1187,22 @@ sub getAPIHandler {
 		$api = $client->pluginData('api');
 
 		if ( !$api ) {
-			my $userdata = Plugins::TIDAL::API->getUserdata($prefs->client($client)->get('userId'));
+			my $userdata = Plugins::TIDAL_test::API->getUserdata($prefs->client($client)->get('userId'));
 
 			# if there's no account assigned to the player, just pick one
 			if ( !$userdata ) {
-				my $userId = Plugins::TIDAL::API->getSomeUserId();
+				my $userId = Plugins::TIDAL_test::API->getSomeUserId();
 				$prefs->client($client)->set('userId', $userId) if $userId;
 			}
 
-			$api = $client->pluginData( api => Plugins::TIDAL::API::Async->new({
+			$api = $client->pluginData( api => Plugins::TIDAL_test::API::Async->new({
 				client => $client
 			}) );
 		}
 	}
 	else {
-		$api = Plugins::TIDAL::API::Async->new({
-			userId => Plugins::TIDAL::API->getSomeUserId()
+		$api = Plugins::TIDAL_test::API::Async->new({
+			userId => Plugins::TIDAL_test::API->getSomeUserId()
 		});
 	}
 

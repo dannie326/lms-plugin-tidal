@@ -1,4 +1,4 @@
-package Plugins::TIDAL::Settings;
+package Plugins::TIDAL_test::Settings;
 
 use strict;
 use base qw(Slim::Web::Settings);
@@ -7,7 +7,7 @@ use JSON::XS::VersionOneAndTwo;
 use HTTP::Status qw(RC_MOVED_TEMPORARILY);
 
 use Slim::Utils::Prefs;
-use Plugins::TIDAL::Settings::Auth;
+use Plugins::TIDAL_test::Settings::Auth;
 
 my $prefs = preferences('plugin.tidal');
 my $log = Slim::Utils::Log::logger('plugin.tidal');
@@ -60,7 +60,7 @@ sub beforeRender {
 		$a->{name} cmp $b->{name}
 	} map {
 		{
-			name => Plugins::TIDAL::API->getHumanReadableName($_),
+			name => Plugins::TIDAL_test::API->getHumanReadableName($_),
 			id => $_->{userId},
 		}
 	} values %$accounts] if scalar keys %$accounts;

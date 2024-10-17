@@ -1,4 +1,4 @@
-package Plugins::TIDAL::API;
+package Plugins::TIDAL_test::API;
 
 use strict;
 use Exporter::Lite;
@@ -108,7 +108,7 @@ sub getImageUrl {
 		$data->{cover} = $image->{url} if $image;
 	}
 
-	return $data->{cover} || (!main::SCANNER && $usePlaceholder && Plugins::TIDAL::Plugin->_pluginDataFor('icon'));
+	return $data->{cover} || (!main::SCANNER && $usePlaceholder && Plugins::TIDAL_test::Plugin->_pluginDataFor('icon'));
 }
 
 sub typeOfItem {

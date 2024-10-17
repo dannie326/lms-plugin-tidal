@@ -1,4 +1,4 @@
-package Plugins::TIDAL::API::Sync;
+package Plugins::TIDAL_test::API::Sync;
 
 use strict;
 use Data::URIEncode qw(complex_to_query);
@@ -10,7 +10,7 @@ use Slim::Networking::SimpleSyncHTTP;
 use Slim::Utils::Cache;
 use Slim::Utils::Log;
 
-use Plugins::TIDAL::API qw(BURL DEFAULT_LIMIT MAX_LIMIT PLAYLIST_LIMIT);
+use Plugins::TIDAL_test::API qw(BURL DEFAULT_LIMIT MAX_LIMIT PLAYLIST_LIMIT);
 
 my $cache = Slim::Utils::Cache->new();
 my $log = logger('plugin.tidal');
@@ -23,7 +23,7 @@ sub getFavorites {
 	my $items = [ map {
 		my $item = $_;
 		$item->{item}->{added} = str2time(delete $item->{created}) if $item->{created};
-		$item->{item}->{cover} = Plugins::TIDAL::API->getImageUrl($item->{item});
+		$item->{item}->{cover} = Plugins::TIDAL_test::API->getImageUrl($item->{item});
 
 		foreach (qw(adSupportedStreamReady allowStreaming audioModes audioQuality copyright djReady explicit
 			mediaMetadata numberOfVideos popularity premiumStreamingOnly stemReady streamReady
@@ -43,7 +43,7 @@ sub albumTracks {
 
 	my $album = $class->_get("/albums/$id/tracks", $userId);
 	my $tracks = $album->{items} if $album;
-	$tracks = Plugins::TIDAL::API->cacheTrackMetadata($tracks) if $tracks;
+	$tracks = Plugins::TIDAL_test::API->cacheTrackMetadata($tracks) if $tracks;
 
 	return $tracks;
 }
@@ -56,7 +56,7 @@ sub collectionPlaylists {
 
 	my $items = [ map {
 		$_->{added} = str2time(delete $_->{created}) if $_->{created};
-		$_->{cover} = Plugins::TIDAL::API->getImageUrl($_);
+		$_->{cover} = Plugins::TIDAL_test::API->getImageUrl($_);
 		$_;
 	} @$result ] if $result && @$result;
 
@@ -68,7 +68,7 @@ sub playlist {
 
 	my $playlist = $class->_get("/playlists/$uuid/items", $userId);
 	my $tracks = $playlist->{items} if $playlist;
-	$tracks = Plugins::TIDAL::API->cacheTrackMetadata($tracks) if $tracks;
+	$tracks = Plugins::TIDAL_test::API->cacheTrackMetadata($tracks) if $tracks;
 
 	return $tracks;
 }
@@ -77,14 +77,14 @@ sub getArtist {
 	my ($class, $userId, $id) = @_;
 
 	my $artist = $class->_get("/artists/$id", $userId);
-	$artist->{cover} = Plugins::TIDAL::API->getImageUrl($artist) if $artist && $artist->{picture};
+	$artist->{cover} = Plugins::TIDAL_test::API->getImageUrl($artist) if $artist && $artist->{picture};
 	return $artist;
 }
 
 sub _get {
 	my ( $class, $url, $userId, $params ) = @_;
 
-	$userId ||= Plugins::TIDAL::API->getSomeUserId();
+	$userId ||= Plugins::TIDAL_test::API->getSomeUserId();
 	my $token = $cache->get("tidal_at_$userId");
 	my $pageSize = delete $params->{_page} || DEFAULT_LIMIT;
 
@@ -94,7 +94,7 @@ sub _get {
 	}
 
 	$params ||= {};
-	$params->{countryCode} ||= Plugins::TIDAL::API->getCountryCode($userId);
+	$params->{countryCode} ||= Plugins::TIDAL_test::API->getCountryCode($userId);
 	$params->{limit} = min($pageSize, $params->{limit} || DEFAULT_LIMIT);
 
 	my $query = complex_to_query($params);

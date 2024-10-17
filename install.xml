@@ -5,10 +5,10 @@
   <creator>philippe_44, Michael Herger</creator>
   <id>16da8158-263f-4347-8125-184372ea5610</id>
   <version>1.5.1</version>
-  <module>Plugins::TIDAL::Plugin</module>
-  <importmodule>Plugins::TIDAL::Importer</importmodule>
-  <optionsURL>plugins/TIDAL/settings.html</optionsURL>
-  <icon>plugins/TIDAL/html/tidal_MTL_svg_tidal.png</icon>
+  <module>Plugins::TIDAL_test::Plugin</module>
+  <importmodule>Plugins::TIDAL_test::Importer</importmodule>
+  <optionsURL>plugins/TIDAL_test/settings.html</optionsURL>
+  <icon>plugins/TIDAL_test/html/tidal_MTL_svg_tidal.png</icon>
   <onlineLibrary>true</onlineLibrary>
   <category>musicservices</category>
   <targetApplication>

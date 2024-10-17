@@ -1,4 +1,4 @@
-package Plugins::TIDAL::API::Async;
+package Plugins::TIDAL_test::API::Async;
 
 use strict;
 use base qw(Slim::Utils::Accessor);
@@ -16,7 +16,7 @@ use Slim::Utils::Log;
 use Slim::Utils::Prefs;
 use Slim::Utils::Strings qw(string);
 
-use Plugins::TIDAL::API qw(BURL DEFAULT_LIMIT PLAYLIST_LIMIT MAX_LIMIT DEFAULT_TTL DYNAMIC_TTL USER_CONTENT_TTL);
+use Plugins::TIDAL_test::API qw(BURL DEFAULT_LIMIT PLAYLIST_LIMIT MAX_LIMIT DEFAULT_TTL DYNAMIC_TTL USER_CONTENT_TTL);
 
 use constant CAN_MORE_HTTP_VERBS => Slim::Networking::SimpleAsyncHTTP->can('delete');
 
@@ -70,7 +70,7 @@ sub search {
 		my $result = shift;
 
 		my $items = $args->{type} ? $result->{items} : $result if $result && ref $result;
-		$items = Plugins::TIDAL::API->cacheTrackMetadata($items) if $args->{type} =~ /tracks/;
+		$items = Plugins::TIDAL_test::API->cacheTrackMetadata($items) if $args->{type} =~ /tracks/;
 
 		$cb->($items);
 	}, {
@@ -85,7 +85,7 @@ sub track {
 
 	$self->_get("/tracks/$id", sub {
 		my $track = shift;
-		($track) = @{ Plugins::TIDAL::API->cacheTrackMetadata([$track]) } if $track;
+		($track) = @{ Plugins::TIDAL_test::API->cacheTrackMetadata([$track]) } if $track;
 		$cb->($track);
 	});
 }
@@ -130,7 +130,7 @@ sub artistTopTracks {
 
 	$self->_get("/artists/$id/toptracks", sub {
 		my $artist = shift;
-		my $tracks = Plugins::TIDAL::API->cacheTrackMetadata($artist->{items}) if $artist;
+		my $tracks = Plugins::TIDAL_test::API->cacheTrackMetadata($artist->{items}) if $artist;
 		$cb->($tracks || []);
 	},{
 		limit => MAX_LIMIT,
@@ -142,7 +142,7 @@ sub trackRadio {
 
 	$self->_get("/tracks/$id/radio", sub {
 		my $result = shift;
-		my $tracks = Plugins::TIDAL::API->cacheTrackMetadata($result->{items}) if $result;
+		my $tracks = Plugins::TIDAL_test::API->cacheTrackMetadata($result->{items}) if $result;
 		$cb->($tracks || []);
 	},{
 		limit => MAX_LIMIT,
@@ -247,7 +247,7 @@ sub featuredItem {
 	$self->_get("/featured/$id/$type", sub {
 		my $items = shift;
 		my $tracks = $items->{items} if $items;
-		$tracks = Plugins::TIDAL::API->cacheTrackMetadata($tracks) if $tracks && $type eq 'tracks';
+		$tracks = Plugins::TIDAL_test::API->cacheTrackMetadata($tracks) if $tracks && $type eq 'tracks';
 
 		$cb->($tracks || []);
 	});
@@ -271,7 +271,7 @@ sub mix {
 	$self->_get("/mixes/$id/items", sub {
 		my $mix = shift;
 
-		my $tracks = Plugins::TIDAL::API->cacheTrackMetadata([ map {
+		my $tracks = Plugins::TIDAL_test::API->cacheTrackMetadata([ map {
 			$_->{item}
 		} grep {
 			$_->{type} && $_->{type} eq 'track'
@@ -302,7 +302,7 @@ sub albumTracks {
 	$self->_get("/albums/$id/tracks", sub {
 		my $album = shift;
 		my $tracks = $album->{items} if $album;
-		$tracks = Plugins::TIDAL::API->cacheTrackMetadata($tracks) if $tracks;
+		$tracks = Plugins::TIDAL_test::API->cacheTrackMetadata($tracks) if $tracks;
 
 		$cb->($tracks || []);
 	},{
@@ -321,7 +321,7 @@ sub genreByType {
 	$self->_get("/genres/$genre/$type", sub {
 		my $results = shift;
 		my $items = $results->{items} if $results;
-		$items = Plugins::TIDAL::API->cacheTrackMetadata($items) if $items && $type eq 'tracks';
+		$items = Plugins::TIDAL_test::API->cacheTrackMetadata($items) if $items && $type eq 'tracks';
 		$cb->($items || []);
 	});
 }
@@ -379,7 +379,7 @@ sub playlist {
 	$self->_get("/playlists/$uuid/items", sub {
 		my $result = shift;
 
-		my $items = Plugins::TIDAL::API->cacheTrackMetadata([ map {
+		my $items = Plugins::TIDAL_test::API->cacheTrackMetadata([ map {
 			$_->{item}
 		} grep {
 			$_->{type} && $_->{type} eq 'track'
@@ -429,7 +429,7 @@ sub getFavorites {
 			my $result = shift;
 
 			my $items = [ map { $_->{item} } @{$result->{items} || []} ] if $result;
-			$items = Plugins::TIDAL::API->cacheTrackMetadata($items) if $items && $type eq 'tracks';
+			$items = Plugins::TIDAL_test::API->cacheTrackMetadata($items) if $items && $type eq 'tracks';
 
 			# verify if playlists need to be invalidated
 			if (defined $timestamp && $type eq 'playlists') {
@@ -654,7 +654,7 @@ sub getToken {
 
 	return $cb->($token) if $token;
 
-	Plugins::TIDAL::API::Auth->refreshToken($cb, $self->userId);
+	Plugins::TIDAL_test::API::Auth->refreshToken($cb, $self->userId);
 }
 
 sub _get {
@@ -697,7 +697,7 @@ sub _call {
 		}
 		else {
 			$params ||= {};
-			$params->{countryCode} ||= Plugins::TIDAL::API->getCountryCode($self->userId);
+			$params->{countryCode} ||= Plugins::TIDAL_test::API->getCountryCode($self->userId);
 
 			$headers ||= {};
 			$headers->{Authorization} = 'Bearer ' . $token;

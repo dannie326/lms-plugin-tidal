@@ -1,4 +1,4 @@
-package Plugins::TIDAL::ProtocolHandler;
+package Plugins::TIDAL_test::ProtocolHandler;
 
 use strict;
 
@@ -13,8 +13,8 @@ use Slim::Utils::Misc;
 use Slim::Utils::Prefs;
 use Slim::Utils::Timers;
 
-use Plugins::TIDAL::Plugin;
-use Plugins::TIDAL::API;
+use Plugins::TIDAL_test::Plugin;
+use Plugins::TIDAL_test::API;
 
 use base qw(Slim::Player::Protocols::HTTPS);
 
@@ -38,12 +38,12 @@ sub canSeek { 1 }
 sub getFormatForURL {
 	my ($class, $url) = @_;
 	return if $url =~ m{^(?:tidal|wimp)://.+:.+};
-	return Plugins::TIDAL::API::getFormat();
+	return Plugins::TIDAL_test::API::getFormat();
 }
 
 sub formatOverride {
 	my ($class, $song) = @_;
-	my $format = $song->pluginData('format') || Plugins::TIDAL::API::getFormat;
+	my $format = $song->pluginData('format') || Plugins::TIDAL_test::API::getFormat;
 	return $format =~ s/mp4/aac/r;
 }
 
@@ -119,23 +119,23 @@ sub explodePlaylist {
 	if ($id) {
 		return $cb->( [ $url ] ) if !$type;
 
-		return $cb->( [ "tidal://$id." . Plugins::TIDAL::API::getFormat() ] ) if $type eq 'track';
+		return $cb->( [ "tidal://$id." . Plugins::TIDAL_test::API::getFormat() ] ) if $type eq 'track';
 
 		my $method;
 		my $params = { id => $id };
 
 		if ($type eq 'playlist') {
-			$method = \&Plugins::TIDAL::Plugin::getPlaylist;
+			$method = \&Plugins::TIDAL_test::Plugin::getPlaylist;
 			$params = { uuid => $id };
 		}
 		elsif ($type eq 'album') {
-			$method = \&Plugins::TIDAL::Plugin::getAlbum;
+			$method = \&Plugins::TIDAL_test::Plugin::getAlbum;
 		}
 		elsif ($type eq 'artist') {
-			$method = \&Plugins::TIDAL::Plugin::getArtistTopTracks;
+			$method = \&Plugins::TIDAL_test::Plugin::getArtistTopTracks;
 		}
 		elsif ($type eq 'mix') {
-			$method = \&Plugins::TIDAL::Plugin::getMix;
+			$method = \&Plugins::TIDAL_test::Plugin::getMix;
 		}
 
 		$method->($client, $cb, {}, $params);
@@ -166,7 +166,7 @@ sub getNextTrack {
 	}
 
 
-	Plugins::TIDAL::Plugin::getAPIHandler($client)->getTrackUrl(sub {
+	Plugins::TIDAL_test::Plugin::getAPIHandler($client)->getTrackUrl(sub {
 		my $response = shift;
 
 		# no DASH or other for now
@@ -184,8 +184,8 @@ sub getNextTrack {
 		# TODO - store album gain information
 
 		# this should not happen
-		if ($format ne Plugins::TIDAL::API::getFormat) {
-			$log->warn("did not get the expected format for $trackId ($format <> " . Plugins::TIDAL::API::getFormat() . ')');
+		if ($format ne Plugins::TIDAL_test::API::getFormat) {
+			$log->warn("did not get the expected format for $trackId ($format <> " . Plugins::TIDAL_test::API::getFormat() . ')');
 			$song->pluginData(format => $format);
 		}
 
@@ -254,7 +254,7 @@ sub getMetadataFor {
 
 		main::DEBUGLOG && $log->is_debug && $log->debug("adding metadata query for $trackId");
 
-		Plugins::TIDAL::Plugin::getAPIHandler($client)->track(sub {
+		Plugins::TIDAL_test::Plugin::getAPIHandler($client)->track(sub {
 			my $meta = shift;
 			@pendingMeta = grep { $_->{id} != $trackId } @pendingMeta;
 			return unless $meta;
@@ -272,7 +272,7 @@ sub getMetadataFor {
 
 	return $meta || {
 		bitrate   => 'N/A',
-		type      => Plugins::TIDAL::API::getFormat(),
+		type      => Plugins::TIDAL_test::API::getFormat(),
 		icon      => $icon,
 		cover     => $icon,
 	};
@@ -280,7 +280,7 @@ sub getMetadataFor {
 
 sub getIcon {
 	my ( $class, $url ) = @_;
-	return Plugins::TIDAL::Plugin->_pluginDataFor('icon');
+	return Plugins::TIDAL_test::Plugin->_pluginDataFor('icon');
 }
 
 sub getId {

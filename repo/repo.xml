@@ -1,7 +1,7 @@
 <?xml version='1.0' standalone='yes'?>
 <extensions>
   <plugins>
-    <plugin minTarget="8.3" name="TIDAL(Test)" maxTarget="*" version="1.5.1">
+    <plugin minTarget="8.3" name="TIDAL_test" maxTarget="*" version="1.5.1">
       <link>https://github.com/dannie326/lms-plugin-tidal</link>
       <desc lang="EN">TIDAL for local LMS use, Test</desc>
       <category>musicservices</category>
