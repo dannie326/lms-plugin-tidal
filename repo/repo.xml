@@ -3,7 +3,7 @@
   <plugins>
     <plugin maxTarget="*" minTarget="8.3" version="1.5.1" name="TIDAL(Test)">
       <creator>Michael Herger, philippe_44</creator>
-      <url>https://github.com/dannie326/lms-plugin-tidal/releases/download/1.5.1/Tidal.Test.zip</url>
+      <url>https://github.com/dannie326/lms-plugin-tidal/releases/download/1.5.1/Tidal_Test.zip</url>
       <title lang="EN">TIDAL Test</title>
       <icon>https://raw.githubusercontent.com/dannie326/lms-plugin-tidal/main/HTML/EN/plugins/TIDAL/html/tidal_MTL_svg_tidal.png</icon>
       <category>musicservices</category>
