@@ -1,5 +1,5 @@
 PLUGIN_TIDAL_NAME
-	EN	TIDAL
+	EN	TIDAL(TEST)
 
 PLUGIN_TIDAL_DESC
 	DA	TIDAL plugin for LMS, som ikke kræver MySqueezebox.com.
