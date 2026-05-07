@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='utf-8'?>
 <extensions>
   <plugins>
-    <plugin minTarget="8.3" version="1.8.2" name="TIDAL" maxTarget="*">
+    <plugin minTarget="8.3" version="1.8.3" name="TIDAL" maxTarget="*">
       <icon>https://raw.githubusercontent.com/dannie326/lms-plugin-tidal/main/HTML/EN/plugins/TIDAL/html/tidal_MTL_svg_tidal.png</icon>
       <category>musicservices</category>
-      <sha>8637fe07a02cd758f019e94b265b02f48ddff104</sha>
+      <sha>ec8af44f6230c378a32290274d88fcf3e804586d</sha>
       <title lang="EN">TIDAL local DASH</title>
-      <url>https://github.com/dannie326/lms-plugin-tidal/releases/download/1.8.2/TIDAL.zip</url>
+      <url>https://github.com/dannie326/lms-plugin-tidal/releases/download/1.8.3/TIDAL.zip</url>
       <desc lang="EN">TIDAL for local LMS use</desc>
       <creator>Michael Herger, philippe_44</creator>
       <link>https://github.com/dannie326/lms-plugin-tidal</link>
