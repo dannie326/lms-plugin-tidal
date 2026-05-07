@@ -7,6 +7,8 @@ use JSON::XS::VersionOneAndTwo;
 use URI::Escape qw(uri_escape_utf8);
 use Scalar::Util qw(blessed);
 use MIME::Base64 qw(encode_base64 decode_base64);
+use File::Temp ();
+use File::Spec;
 
 use Slim::Utils::Cache;
 use Slim::Utils::Log;
@@ -243,13 +245,16 @@ sub getNextTrack {
 			elsif ($response->{manifestMimeType} eq 'application/dash+xml') {
 				$format = "mpd";
 
-				# save the manifest to a temporary file and stream from there
-				# temporary file is only deleted automatically when the program ends
-				# this is not ideal as it will clutter up the temp directory
-				my $fh = File::Temp->new(DIR => Slim::Utils::Misc::getTempDir, SUFFIX => '.' . $format, UNLINK => 0);
-				$fh->write($manifest);
-				$fh->close();
-				$streamUrl = Slim::Utils::Misc::fileURLFromPath($fh);
+				# Write the MPD manifest to a deterministic per-track temp file.
+				# Using a fixed name per trackId means the file is overwritten on
+				# replay (no unbounded disk growth) and is not deleted mid-playback.
+				my $tmpDir  = Slim::Utils::Misc::getTempDir();
+				my $tmpFile = File::Spec->catfile($tmpDir, "tidal_mpd_${trackId}.mpd");
+				open(my $fh, '>', $tmpFile)
+					or return _gotTrackError("Cannot write DASH manifest: $!", $errorCb);
+				print $fh $manifest;
+				close($fh);
+				$streamUrl = Slim::Utils::Misc::fileURLFromPath($tmpFile);
 
 				# some details need to be added
 				$song->track->channels(2);
@@ -257,7 +262,9 @@ sub getNextTrack {
 				$song->track->samplesize($response->{bitDepth});
 				
 				my $metadata = $cache->get( 'tidal_meta_' . $trackId);
-				Slim::Music::Info::setBitrate( $song->track, $response->{sampleRate});
+				# Compute a realistic peak bitrate (lossless): sampleRate × bitDepth × channels
+				my $dashBitrate = $response->{sampleRate} * ($response->{bitDepth} || 24) * 2;
+				Slim::Music::Info::setBitrate( $song->track, $dashBitrate );
 				Slim::Music::Info::setDuration( $song->track, $metadata->{duration});
 			}
 			else {
