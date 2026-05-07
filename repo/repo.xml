@@ -4,7 +4,7 @@
     <plugin minTarget="8.3" version="1.8.2" name="TIDAL" maxTarget="*">
       <icon>https://raw.githubusercontent.com/dannie326/lms-plugin-tidal/main/HTML/EN/plugins/TIDAL/html/tidal_MTL_svg_tidal.png</icon>
       <category>musicservices</category>
-      <sha>82b1aa39f3351113b33288199b3e62a4d3d12b2e</sha>
+      <sha>8637fe07a02cd758f019e94b265b02f48ddff104</sha>
       <title lang="EN">TIDAL local DASH</title>
       <url>https://github.com/dannie326/lms-plugin-tidal/releases/download/1.8.2/TIDAL.zip</url>
       <desc lang="EN">TIDAL for local LMS use</desc>
