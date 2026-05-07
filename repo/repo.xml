@@ -3,7 +3,7 @@
   <plugins>
     <plugin minTarget="8.3" maxTarget="*" version="1.8.1_dev" name="TIDAL">
       <url>https://github.com/dannie326/lms-plugin-tidal/releases/download/1.8.1_dev/TIDAL.zip</url>
-      <title lang="EN">TIDAL local</title>
+      <title lang="EN">TIDAL local DASH</title>
       <link>https://github.com/dannie326/lms-plugin-tidal</link>
       <sha>9fb05c163be3bcd636f2339cd40f056f6bc51c68</sha>
       <creator>Michael Herger, philippe_44</creator>
